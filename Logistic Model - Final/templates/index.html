@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #99ddff;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Churn Prediction</h1>
+        <h2>(Logistic Regression)</h2>
+        <form id="predictForm">
+            <div id="inputs"></div>
+            <button type="button" onclick="submitForm()">Submit</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const featureNames = [
+            "REST_AVG_CUR",
+            "LDEAL_ACT_DAYS_PCT_AAVG",
+            "REST_DYNAMIC_IL_3M",
+            "CR_PROD_CNT_IL_5",
+            "CR_PROD_CNT_TOVR_4",
+            "REST_DYNAMIC_CUR_1M",
+            "CR_PROD_CNT_TOVR_5",
+            "CR_PROD_CNT_PIL_4",
+            "TURNOVER_DYNAMIC_IL_3M",
+            "TURNOVER_DYNAMIC_IL_1M",
+            "APP_MARITAL_STATUS_Civil Union",
+            "CR_PROD_CNT_CC_9",
+            "PACK_109",
+            "CR_PROD_CNT_VCU_3",
+            "CR_PROD_CNT_TOVR_6"
+        ];
+
+        const inputsDiv = document.getElementById('inputs');
+        featureNames.forEach(name => {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.step = 'any';
+            input.name = name;
+            input.placeholder = name;
+            inputsDiv.appendChild(input);
+        });
+
+        function submitForm() {
+            const formData = new FormData(document.getElementById('predictForm'));
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = parseFloat(value) || 0;
+            });
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result == '0') {
+                    document.getElementById('result').innerText = 'The Customer will not Churn';
+                    document.getElementById('result').style.color = 'red';
+                } else {
+                    document.getElementById('result').innerText = 'The Customer will most likely Churn';
+                    document.getElementById('result').style.color = 'green';
+                }
+                
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerText = 'An error occurred.';
+            });
+        }
+    </script>
+</body>
+</html>
